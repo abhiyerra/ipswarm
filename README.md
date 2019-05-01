@@ -26,3 +26,5 @@ go build
  - [ ] Handle that the task has been finished
  - [ ] WASM for isolation and security
  - [ ] Maybe start isolation of the VM with Firecracker?
+ - [ ] Claim jobs so that only a single node runs the task at a time
+ - [ ] Isolation of network resources
