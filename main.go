@@ -53,9 +53,7 @@ func main() {
 					if err != nil {
 						log.Println(err)
 						continue
-                    }
-
-
+					}
 
 					log.Println(string(msg.Data))
 
@@ -105,9 +103,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-// ipfs daemon --enable-pubsub-experiment
-// go build
-// ./cloudless server
-// ./cloudless publish <dockerimage>
-// # registry.hub.docker.com/library/nginx
