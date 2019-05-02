@@ -1,6 +1,6 @@
 # IPFS-Compute
 
-Run Serverless loads powered by IPFS.
+Run Serverless workloads loads powered by IPFS.
 
 # Status
 
@@ -13,17 +13,33 @@ Run a docker daemon
 
 ```
 ipfs daemon --enable-pubsub-experiment
-go build
 ```
 
 # Usage
 
+## Worker
+
 ```
-./cloudless server
-./cloudless publish <dockerimage>
-# Full canoncical registry name. eg registry.hub.docker.com/library/nginx
+ipfs-compute worker
 ```
 
+## Submit AWS Lambda Job
+
+```
+ipfs-compute submit --type aws-lambda --runtime ruby2.5 --event event.json --zip <file>
+```
+
+## Submit Docker Job
+
+Full canonical registry name. eg registry.hub.docker.com/library/nginx
+
+```
+ipfs-compute submit --type docker --image <image> --cmd <cmd>
+```
+
+```
+ipfs-compute submit --type docker --image registry.hub.docker.com/library/nginx
+```
 
 # Future
 
