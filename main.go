@@ -25,6 +25,7 @@ var (
 const (
 	DockerType    string = "docker"
 	AwsLambdaType        = "aws-lambda"
+	WasmType             = "wasm"
 )
 
 type Job struct {
