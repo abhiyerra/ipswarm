@@ -29,6 +29,12 @@ type Job struct {
 		Image string
 		Cmd   []string
 	}
+
+	// Handler
+	// Wasm
+	// Event
+	// Context
+	// AllowFlood
 }
 
 func (j *Job) Start() error {
@@ -127,6 +133,14 @@ func worker(c *cli.Context) error {
 		j.Start()
 	}
 	return nil
+}
+
+func apiGateway() {
+	// TODO:
+	// Http Request comes in and is sent into pub sub
+	// Block on object get
+	// Can be an api for any request
+	// /ipfs-request/path
 }
 
 func main() {
