@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -22,6 +22,11 @@ var (
 	sh *shell.Shell
 )
 
+const (
+	DockerType    string = "docker"
+	AwsLambdaType        = "aws-lambda"
+)
+
 type Job struct {
 	Version string
 	Type    string
@@ -30,7 +35,13 @@ type Job struct {
 		Cmd   []string
 	}
 
-	// Handler
+	AwsLambda struct {
+		ZipFileCid string
+		Runtime    string
+		Handler    string
+		Event      string
+	}
+
 	// Wasm
 	// Event
 	// Context
@@ -41,6 +52,8 @@ func (j *Job) Start() error {
 	switch j.Type {
 	case DockerType:
 		return j.startDocker()
+	case AwsLambdaType:
+		return j.startAwsLambda()
 	}
 
 	return nil
@@ -83,9 +96,68 @@ func (j *Job) startDocker() error {
 	return nil
 }
 
-const (
-	DockerType string = "docker"
-)
+func (j *Job) startAwsLambda() error {
+	tmpfile, err := ioutil.TempFile("", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// defer os.Remove(tmpfile.Name()) // clean up
+
+	sh.Get(j.AwsLambda.ZipFileCid, tmpfile.Name())
+
+	dir, err := ioutil.TempDir("", j.AwsLambda.ZipFileCid)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// defer os.RemoveAll(dir) // clean up
+
+	filenames, err := unzip(tmpfile.Name(), dir)
+
+	log.Println(err)
+	log.Println(filenames)
+	log.Println(dir)
+
+	ctx := context.Background()
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return err
+	}
+
+	reader, err := cli.ImagePull(ctx, "registry.hub.docker.com/lambci/lambda:"+j.AwsLambda.Runtime, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	io.Copy(os.Stdout, reader)
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: j.Docker.Image,
+		Tty:   true,
+		Cmd: []string{
+			j.AwsLambda.Handler,
+			j.AwsLambda.Event,
+		},
+	}, &container.HostConfig{
+		Binds: []string{
+			dir + ":/tasks",
+		},
+	}, nil, "")
+	if err != nil {
+		return err
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return err
+	}
+
+	out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
+	if err != nil {
+		return err
+	}
+
+	io.Copy(os.Stdout, out)
+
+	return nil
+}
 
 func publish(c *cli.Context) error {
 	j := Job{Version: "1.0"}
@@ -95,7 +167,21 @@ func publish(c *cli.Context) error {
 		j.Type = DockerType
 		j.Docker.Image = c.String("image")
 		j.Docker.Cmd = c.StringSlice("cmd")
+	case AwsLambdaType:
+		j.Type = AwsLambdaType
+		j.AwsLambda.Runtime = c.String("runtime")
+		j.AwsLambda.Event = c.String("event")
 
+		content, err := ioutil.ReadFile(c.String("zip-file"))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cid, err := sh.Add(bytes.NewReader(content))
+		if err != nil {
+			log.Fatal(err)
+		}
+		j.AwsLambda.ZipFileCid = cid
 	}
 
 	b, err := json.Marshal(j)
@@ -130,7 +216,7 @@ func worker(c *cli.Context) error {
 			continue
 		}
 
-		j.Start()
+		log.Println(j.Start())
 	}
 	return nil
 }
@@ -145,12 +231,6 @@ func apiGateway() {
 
 func main() {
 	sh = shell.NewShell("localhost:5001")
-	cid, err := sh.Add(strings.NewReader("hello world!"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %s", err)
-		os.Exit(1)
-	}
-	fmt.Printf("added %s", cid)
 
 	app := cli.NewApp()
 
@@ -167,6 +247,23 @@ func main() {
 					Name:  "image",
 					Usage: "docker image",
 				},
+				cli.StringFlag{
+					Name:  "runtime",
+					Value: "nodejs8.10",
+					Usage: "AWS Lambda Runtime",
+				},
+				cli.StringFlag{
+					Name:  "event",
+					Usage: "An event that is specified as a json file.",
+				},
+				cli.StringFlag{
+					Name:  "zip-file",
+					Usage: "File containing the AWS Lambda code",
+				},
+				cli.StringFlag{
+					Name:  "handler",
+					Usage: "handler for AWS Lambda",
+				},
 				cli.StringSliceFlag{
 					Name:  "cmd",
 					Usage: "command to send to docker",
@@ -181,8 +278,7 @@ func main() {
 		},
 	}
 
-	err = app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

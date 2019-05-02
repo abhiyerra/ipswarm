@@ -51,7 +51,7 @@ ipfs-compute submit --type wasm --event event.json --wasm-file <file>
 ## TODO Submit AWS Lamba Job
 
 ```
-ipfs-compute submit --type aws-lambda --runtime ruby2.5 --event event.json --zip <file>
+ipfs-compute submit --type aws-lambda  --zip-file <file> --runtime ruby2.5 --event event.json --handler name
 ```
 
 ## Submit Docker Job
