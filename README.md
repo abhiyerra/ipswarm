@@ -48,7 +48,7 @@ ipfs-compute submit --type wasm --event event.json --wasm-file <file>
     - [ ] https://github.com/perlin-network/life
         - [ ] Limit network calls
 
-## TODO Submit AWS Lamba Job
+## Submit AWS Lamba Job
 
 ```
 ipfs-compute submit --type aws-lambda  --zip-file <file> --runtime ruby2.5 --event event.json --handler name
