@@ -31,7 +31,8 @@ const (
 type Job struct {
 	Version string
 	Type    string
-	Docker  struct {
+
+	Docker struct {
 		Image string
 		Cmd   []string
 	}
@@ -43,7 +44,12 @@ type Job struct {
 		Event      string
 	}
 
-	// Wasm
+	Wasm struct {
+		WasmFileCid string
+		Function    string
+
+		wasmContent []byte
+	}
 	// Event
 	// Context
 	// AllowFlood
@@ -55,6 +61,8 @@ func (j *Job) Start() error {
 		return j.startDocker()
 	case AwsLambdaType:
 		return j.startAwsLambda()
+		// case WasmType:
+		// 	return j.startWasm()
 	}
 
 	return nil
@@ -159,6 +167,18 @@ func (j *Job) startAwsLambda() error {
 
 	return nil
 }
+
+// func (j *Job) startWasm() {
+// 	vm, err := exec.NewVirtualMachine(input, exec.VMConfig{}, new(Resolver), nil)
+// 	if err != nil { // if the wasm bytecode is invalid
+// 		panic(err)
+// 	}
+
+// 	if !ok {
+// 		panic("entry function not found")
+// 	}
+// 	panic("entry function not found")
+// }
 
 func publish(c *cli.Context) error {
 	j := Job{Version: "1.0"}
