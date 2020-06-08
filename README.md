@@ -35,7 +35,7 @@ ipfs-compute api-gateway
 ## TODO Submit WASM Job
 
 ```
-ipfs-compute submit --type wasm --event event.json --wasm-file <file>
+ipfs-compute submit  --handler handler --wasm-cid <cid>
 ```
 
  - Three functions will be made available within WASM:
@@ -47,24 +47,6 @@ ipfs-compute submit --type wasm --event event.json --wasm-file <file>
  - [ ] WASM for isolation and security avoids external dependencies like docker
     - [ ] https://github.com/perlin-network/life
         - [ ] Limit network calls
-
-## Submit AWS Lamba Job
-
-```
-ipfs-compute submit --type aws-lambda  --zip-file <file> --runtime ruby2.5 --event event.json --handler name
-```
-
-## Submit Docker Job
-
-Full canonical registry name. eg registry.hub.docker.com/library/nginx
-
-```
-ipfs-compute submit --type docker --image <image> --cmd <cmd>
-```
-
-```
-ipfs-compute submit --type docker --image registry.hub.docker.com/library/nginx
-```
 
 # Future
 
