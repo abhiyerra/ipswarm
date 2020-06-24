@@ -1,4 +1,4 @@
-# IPFS-Compute
+# IPSwarm
 
 Serverless Workloads Powered by IPFS, WASM, WASI.
 
