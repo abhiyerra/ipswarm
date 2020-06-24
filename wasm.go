@@ -33,7 +33,8 @@ func WasmWasiRun(wasmBytes []byte) string {
 
 	config := wasmtime.NewWasiConfig()
 	config.InheritStdout()
-	instance, err := wasmtime.NewWasiInstance(store, config, "hello-world")
+	// config.SetStdoutFile("./stdout")
+	instance, err := wasmtime.NewWasiInstance(store, config, "wasi_snapshot_preview1")
 	check(err)
 
 	module, err := wasmtime.NewModule(store, wasmBytes)
@@ -43,10 +44,11 @@ func WasmWasiRun(wasmBytes []byte) string {
 	linker.DefineWasi(instance)
 	instance1, err := linker.Instantiate(module)
 
-	run := instance1.GetExport("").Func()
-	results, err := run.Call()
+	run := instance1.GetExport("main").Func()
+	_, err = run.Call(0, 0)
 
-	fmt.Println(results)
+	// fmt.Println(results)
+	// fmt.Println(err)
 
 	return "'"
 }
