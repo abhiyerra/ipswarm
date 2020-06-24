@@ -1,5 +1,5 @@
 [package]
-name = "ipswarm"
+name = "hello-world"
 version = "0.1.0"
 authors = ["Abhi Yerra <abhi@berkeley.edu>"]
 edition = "2018"

@@ -58,11 +58,21 @@ ipfs-compute submit  --handler handler --wasm-cid <cid>
     - [ ] Maybe start isolation of the VM with Firecracker?
 
 
+# Build New Function
+
+```
+cargo new hello-world
+rustup target add wasm32-wasi
+cargo build --target wasm32-wasi --release
+ipfs add --quiet target/wasm32-wasi/release/hello-world.wasm
+```
+
+
 # License
 
 The MIT License (MIT)
 
-Copyright (c) 2019 Abhi Yerra
+Copyright (c) 2019-2020 Abhi Yerra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

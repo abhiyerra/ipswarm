@@ -1,23 +1,19 @@
-module github.com/abhiyerra/ipfs-compute
+module github.com/abhiyerra/ipswarm
 
-go 1.12
-
-replace github.com/go-interpreter/wagon v0.0.0 => github.com/perlin-network/wagon v0.3.1-0.20180825141017-f8cb99b55a39
+go 1.14
 
 require (
-	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3 // indirect
-	github.com/gogo/protobuf v1.3.0 // indirect
-	github.com/ipfs/go-ipfs-api v0.0.2
-	github.com/ipfs/go-ipfs-files v0.0.4 // indirect
-	github.com/libp2p/go-libp2p-core v0.2.2 // indirect
-	github.com/libp2p/go-libp2p-metrics v0.1.0 // indirect
-	github.com/libp2p/go-libp2p-peer v0.2.0 // indirect
-	github.com/minio/sha256-simd v0.1.1 // indirect
-	github.com/multiformats/go-multiaddr-dns v0.0.3 // indirect
-	github.com/multiformats/go-multihash v0.0.8 // indirect
-	github.com/urfave/cli v1.22.1
-	github.com/wasmerio/go-ext-wasm v0.0.0-20190901094402-a899f2af3b8f
-	go.opencensus.io v0.22.1 // indirect
-	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7 // indirect
-	golang.org/x/sys v0.0.0-20190913121621-c3b328c6e5a7 // indirect
+	github.com/bytecodealliance/wasmtime-go v0.17.0
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gorilla/mux v1.7.4
+	github.com/ipfs/go-cid v0.0.6 // indirect
+	github.com/ipfs/go-ipfs-api v0.1.0
+	github.com/kr/pretty v0.1.0 // indirect
+	github.com/libp2p/go-libp2p-core v0.6.0 // indirect
+	github.com/libp2p/go-openssl v0.0.6 // indirect
+	github.com/mr-tron/base58 v1.2.0 // indirect
+	go.opencensus.io v0.22.4 // indirect
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
+	golang.org/x/sys v0.0.0-20200622214017-ed371f2e16b4 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
