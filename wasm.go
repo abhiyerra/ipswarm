@@ -50,7 +50,7 @@ func WasmWasiRun(wasmBytes []byte) string {
 	// fmt.Println(results)
 	// fmt.Println(err)
 
-	return "'"
+	return ""
 }
 
 func check(e error) {

@@ -15,9 +15,11 @@ import (
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{ipfsRef}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+
 		sh := shell.NewShell("localhost:5001")
 
-		o, err := sh.Cat("QmXFyK5Gj8cJLZwsMoJV7cGT7NsHaGMGoKHZPHtnobMRSY")
+		o, err := sh.Cat(vars["ipfsRef"])
 		if err != nil {
 			fmt.Println(err)
 		}
