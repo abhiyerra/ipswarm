@@ -1,67 +1,60 @@
 package main
 
-// import (
-// 	"fmt"
+import (
+	"fmt"
 
-// 	"github.com/perlin-network/life/exec"
-// )
+	"github.com/bytecodealliance/wasmtime-go"
+)
 
-// type Resolver struct{}
+func WasmRun(wasmBytes []byte) string {
+	store := wasmtime.NewStore(wasmtime.NewEngine())
 
-// func (r *Resolver) ResolveFunc(module, field string) exec.FunctionImport {
-// 	switch module {
-// 	case "env":
-// 		switch field {
-// 		case "ipfsComputeLog":
-// 			return func(vm *exec.VirtualMachine) int64 {
-// 				ptr := int(uint32(vm.GetCurrentFrame().Locals[0]))
-// 				msgLen := int(uint32(vm.GetCurrentFrame().Locals[1]))
-// 				msg := vm.Memory[ptr : ptr+msgLen]
-// 				fmt.Printf("[app] %s\n", string(msg))
-// 				return 0
-// 			}
-// 		case "ipfsComputeGet":
-// 			return func(vm *exec.VirtualMachine) int64 {
-// 				ptr := int(uint32(vm.GetCurrentFrame().Locals[0]))
-// 				msgLen := int(uint32(vm.GetCurrentFrame().Locals[1]))
-// 				msg := vm.Memory[ptr : ptr+msgLen]
-// 				fmt.Printf("[app] %s\n", string(msg))
-// 				return 0
-// 			}
-// 		case "ipfsComputeLs":
-// 			return func(vm *exec.VirtualMachine) int64 {
-// 				ptr := int(uint32(vm.GetCurrentFrame().Locals[0]))
-// 				msgLen := int(uint32(vm.GetCurrentFrame().Locals[1]))
-// 				msg := vm.Memory[ptr : ptr+msgLen]
-// 				fmt.Printf("[app] %s\n", string(msg))
-// 				return 0
-// 			}
+	// Once we have our binary `wasm` we can compile that into a `*Module`
+	// which represents compiled JIT code.
+	module, err := wasmtime.NewModule(store, wasmBytes)
+	check(err)
 
-// 		case "ipfsComputeAdd":
-// 			return func(vm *exec.VirtualMachine) int64 {
-// 				ptr := int(uint32(vm.GetCurrentFrame().Locals[0]))
-// 				msgLen := int(uint32(vm.GetCurrentFrame().Locals[1]))
-// 				msg := vm.Memory[ptr : ptr+msgLen]
-// 				fmt.Printf("[app] %s\n", string(msg))
-// 				return 0
-// 			}
+	// Next up we instantiate a module which is where we link in all our
+	// imports. We've got one import so we pass that in here.
+	instance, err := wasmtime.NewInstance(store, module, []*wasmtime.Extern{})
+	check(err)
 
-// 		case "ipfsComputeCurl":
-// 			return func(vm *exec.VirtualMachine) int64 {
-// 				ptr := int(uint32(vm.GetCurrentFrame().Locals[0]))
-// 				msgLen := int(uint32(vm.GetCurrentFrame().Locals[1]))
-// 				msg := vm.Memory[ptr : ptr+msgLen]
-// 				fmt.Printf("[app] %s\n", string(msg))
-// 				return 0
-// 			}
-// 		default:
-// 			panic(fmt.Errorf("unknown import resolved: %s", field))
-// 		}
-// 	default:
-// 		panic(fmt.Errorf("unknown module: %s", module))
-// 	}
-// }
+	// After we've instantiated we can lookup our `run` function and call
+	// it.
+	run := instance.GetExport("handler").Func()
+	results, err := run.Call()
+	check(err)
 
-// func (r *Resolver) ResolveGlobal(module, field string) int64 {
-// 	panic("we're not resolving global variables for now")
-// }
+	return results.(string)
+}
+
+func WasmWasiRun(wasmBytes []byte) string {
+	store := wasmtime.NewStore(wasmtime.NewEngine())
+
+	config := wasmtime.NewWasiConfig()
+	config.InheritStdout()
+	// config.SetStdoutFile("./stdout")
+	instance, err := wasmtime.NewWasiInstance(store, config, "wasi_snapshot_preview1")
+	check(err)
+
+	module, err := wasmtime.NewModule(store, wasmBytes)
+	check(err)
+
+	linker := wasmtime.NewLinker(store)
+	linker.DefineWasi(instance)
+	instance1, err := linker.Instantiate(module)
+
+	run := instance1.GetExport("main").Func()
+	_, err = run.Call(0, 0)
+
+	// fmt.Println(results)
+	// fmt.Println(err)
+
+	return ""
+}
+
+func check(e error) {
+	if e != nil {
+		fmt.Println(e)
+	}
+}
