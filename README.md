@@ -4,9 +4,17 @@ Serverless Workloads Powered by IPFS, WASM, WASI.
 
 # Usage
 
+## Run IPFS
+
 ```
-go build
-./ipswarm
+ipfs daemon
+```
+
+## Run IPSwarm
+
+```
+docker build -t ipswarm .
+docker run --rm -it -p 8585:8585 ipswarm
 ```
 
 ## Rust Example
@@ -15,17 +23,12 @@ go build
 cargo new hello-world
 cd hello-world
 rustup target add wasm32-wasi
+
 cargo build --target wasm32-wasi --release
-
 IPFS_REF=$(ipfs add --quiet target/wasm32-wasi/release/hello-world.wasm)
-curl http://localhost:8585/${IPFS_REF}
+curl http://localhost:8585/$IPFS_REF
+
 ```
-
-
-# Todo
-
- - [ ] Return Output from WASM to the screen.
-
 
 # License
 
