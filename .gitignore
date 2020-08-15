@@ -1,1 +1,3 @@
-ipfs-compute
+ipswarm
+wasmtime
+examples/hello-world/target/
